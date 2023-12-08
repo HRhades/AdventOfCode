@@ -64,6 +64,25 @@ func (g *cubeGame) isValid(cs *cubeSet) bool {
 	return true
 }
 
+func (g *cubeGame) minNumCubes() int {
+	var red int = 0
+	var blue int = 0
+	var green int = 0
+	for _, s := range g.cubeSets {
+		if s.redCubes > red {
+			red = s.redCubes
+		}
+		if s.blueCubes > blue {
+			blue = s.blueCubes
+		}
+		if s.greenCubes > green {
+			green = s.greenCubes
+		}
+	}
+	// return []int{red, green, blue}
+	return red * green * blue
+}
+
 func parseGameString(gstring string) *cubeGame {
 	// fmt.Println(gstring)
 	gameSplit := strings.Split(gstring, ":")
@@ -136,7 +155,26 @@ func part1(filePath string) {
 	fmt.Println(total)
 }
 
+func part2(filePath string) {
+	file, err := os.Open(filePath)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer file.Close()
+	scanner := bufio.NewScanner(file)
+	var total int
+	for scanner.Scan() {
+		gameString := scanner.Text()
+
+		cgame := parseGameString(gameString)
+		minCubes := cgame.minNumCubes()
+		total += minCubes
+	}
+	fmt.Println(total)
+}
+
 func main() {
 	filePath := "input.txt"
-	part1(filePath)
+	// part1(filePath)
+	part2(filePath)
 }
