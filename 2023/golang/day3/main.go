@@ -8,34 +8,55 @@ import (
 	"strconv"
 )
 
-type schemaIndex struct {
-	index [][]int
-}
-
 type schemaNumbers struct {
 	number       int
-	indexNumbers []schemaIndex
+	indexNumbers [][2]int
 }
 
 type engineSchema struct {
 	schema [140][140]string
 }
 
-func (es *engineSchema) indexNumbers() {
+func (es *engineSchema) indexNumbers() []schemaNumbers {
+	var numberString = ""
+	var indexAray = [][2]int{}
+	var schemaNumbersArray = []schemaNumbers{}
 	for i := 0; i < 140; i++ {
 		fmt.Println()
-		var numberArray = []int{}
 		for j := 0; j < 140; j++ {
-			IdInt, err := strconv.Atoi(es.schema[i][j])
+			_, err := strconv.Atoi(es.schema[i][j])
 			if err == nil {
-				numberArray = append(numberArray, IdInt)
+				numberString = numberString + es.schema[i][j]
+				siValue := [2]int{i, j}
+				indexAray = append(indexAray, siValue)
+				fmt.Println(es.schema[i][j])
 			} else {
+				// we got a new number!
+				if numberString != "" {
+					fmt.Println(numberString)
+					stringNum, err := strconv.Atoi(numberString)
+					if err == nil {
+						snum := schemaNumbers{number: stringNum, indexNumbers: indexAray}
+						schemaNumbersArray = append(schemaNumbersArray, snum)
+						fmt.Println(snum)
+					}
 
+				}
+				numberString = ""
+				indexAray = [][2]int{}
 			}
-			fmt.Print(es.schema[i][j])
-			fmt.Print(numberArray)
 		}
 	}
+	if numberString != "" {
+		fmt.Println(numberString)
+		stringNum, err := strconv.Atoi(numberString)
+		if err == nil {
+			snum := schemaNumbers{number: stringNum, indexNumbers: indexAray}
+			schemaNumbersArray = append(schemaNumbersArray, snum)
+			fmt.Println(snum)
+		}
+	}
+	return schemaNumbersArray
 }
 
 func newEngineSchema(inputFile string) *engineSchema {
@@ -61,6 +82,7 @@ func newEngineSchema(inputFile string) *engineSchema {
 func part1() {
 	filePath := "input.txt"
 	engineSchematic := newEngineSchema(filePath)
+	engineSchematic.indexNumbers()
 	// for i := 0; i < 140; i++ {
 	// 	fmt.Println()
 	// 	for j := 0; j < 140; j++ {
@@ -68,7 +90,7 @@ func part1() {
 	// 	}
 	// }
 
-	fmt.Println(engineSchematic.schema[139][139])
+	// fmt.Println(engineSchematic.schema[139][139])
 }
 
 func main() {
