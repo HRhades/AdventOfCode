@@ -74,12 +74,19 @@ func (es *engineSchema) indexGears(schemaNums []schemaNumbers) []schemaGear {
 				matchNum := 0
 				matchArray := []int{}
 				for _, schemaNum := range schemaNums {
-					fmt.Println(slices.Contains(schemaNum.indexNumbers, [2]int{i, j}))
-					if slices.Contains(schemaNum.indexNumbers, [2]int{i, j}) {
-						fmt.Println(schemaString, [2]int{i, j}, schemaNum.indexNumbers)
-						matchNum += 1
-						matchArray = append(matchArray, schemaNum.number)
+					for _, index := range schemaNum.indexNumbers {
+						neighbours := findNeighboursIndices(index, es)
+						if slices.Contains(neighbours, [2]int{i, j}) {
+							fmt.Println(schemaString, [2]int{i, j}, schemaNum.indexNumbers)
+							if !slices.Contains(matchArray, schemaNum.number) {
+								matchNum += 1
+								matchArray = append(matchArray, schemaNum.number)
+							}
+							break
+						}
 					}
+					// fmt.Println([2]int{i, j}, schemaNum.indexNumbers, slices.Contains(schemaNum.indexNumbers, [2]int{i, j}))
+					// fmt.Println(slices.Contains(schemaNum.indexNumbers, [2]int{i, j}))
 				}
 				scGear := schemaGear{gearIndex: [2]int{i, j}, gearNumbers: matchArray}
 				if matchNum == 2 {
@@ -213,6 +220,93 @@ func findValidIndex(inIndex [2]int, es *engineSchema) bool {
 		// fmt.Println(neighbourStrings)
 	}
 	return false
+}
+
+func findNeighboursIndices(inIndex [2]int, es *engineSchema) [][2]int {
+	x := inIndex[0]
+	y := inIndex[1]
+
+	colMax := len(es.schema[0]) - 1
+	rowMax := len(es.schema) - 1
+
+	neighbourIndices := [][2]int{}
+
+	// 1 2 3
+	// 4 X 5
+	// 6 7 8
+	if (x == 0) && (y == 0) {
+		// X 5
+		// 7 8
+		neighbourIndices = append(neighbourIndices, [2]int{x + 1, y})     // 5
+		neighbourIndices = append(neighbourIndices, [2]int{x, y + 1})     // 7
+		neighbourIndices = append(neighbourIndices, [2]int{x + 1, y + 1}) // 8
+	} else if (x == 0) && (y == rowMax) {
+		// 2 3
+		// X 5
+		neighbourIndices = append(neighbourIndices, [2]int{x, y - 1})     // 2
+		neighbourIndices = append(neighbourIndices, [2]int{x + 1, y - 1}) // 3
+		neighbourIndices = append(neighbourIndices, [2]int{x + 1, y})     // 5
+	} else if (x == 0) && (y != 0) {
+		// 2 3
+		// X 5
+		// 7 8
+		neighbourIndices = append(neighbourIndices, [2]int{x, y - 1})     // 2
+		neighbourIndices = append(neighbourIndices, [2]int{x + 1, y - 1}) // 3
+		neighbourIndices = append(neighbourIndices, [2]int{x + 1, y})     // 5
+		neighbourIndices = append(neighbourIndices, [2]int{x, y + 1})     // 7
+		neighbourIndices = append(neighbourIndices, [2]int{x + 1, y + 1}) // 8
+	} else if (x == colMax) && (y == rowMax) {
+		// 1 2
+		// 4 X
+		neighbourIndices = append(neighbourIndices, [2]int{x - 1, y - 1}) // 1
+		neighbourIndices = append(neighbourIndices, [2]int{x, y - 1})     // 2
+		neighbourIndices = append(neighbourIndices, [2]int{x - 1, y})     // 4
+	} else if (x == colMax) && (y == 0) {
+		// 4 X
+		// 6 7
+		neighbourIndices = append(neighbourIndices, [2]int{x - 1, y})     // 4
+		neighbourIndices = append(neighbourIndices, [2]int{x - 1, y + 1}) // 6
+		neighbourIndices = append(neighbourIndices, [2]int{x, y + 1})     // 7
+	} else if (x == colMax) && (y != 0) {
+		// 1 2
+		// 4 X
+		// 6 7
+		neighbourIndices = append(neighbourIndices, [2]int{x - 1, y - 1}) // 1
+		neighbourIndices = append(neighbourIndices, [2]int{x, y - 1})     // 2
+		neighbourIndices = append(neighbourIndices, [2]int{x - 1, y})     // 4
+		neighbourIndices = append(neighbourIndices, [2]int{x - 1, y + 1}) // 6
+		neighbourIndices = append(neighbourIndices, [2]int{x, y + 1})     // 7
+	} else if (x != 0) && (y == rowMax) {
+		// 1 2 3
+		// 4 X 5
+		neighbourIndices = append(neighbourIndices, [2]int{x - 1, y - 1}) // 1
+		neighbourIndices = append(neighbourIndices, [2]int{x, y - 1})     // 2
+		neighbourIndices = append(neighbourIndices, [2]int{x + 1, y - 1}) // 3
+		neighbourIndices = append(neighbourIndices, [2]int{x - 1, y})     // 4
+		neighbourIndices = append(neighbourIndices, [2]int{x + 1, y})     // 5
+	} else if (x != 0) && (y == 0) {
+		// 4 X 5
+		// 6 7 8
+		neighbourIndices = append(neighbourIndices, [2]int{x - 1, y})     // 4
+		neighbourIndices = append(neighbourIndices, [2]int{x + 1, y})     // 5
+		neighbourIndices = append(neighbourIndices, [2]int{x - 1, y + 1}) // 6
+		neighbourIndices = append(neighbourIndices, [2]int{x, y + 1})     // 7
+		neighbourIndices = append(neighbourIndices, [2]int{x + 1, y + 1}) // 8
+	} else {
+		// 1 2 3
+		// 4 X 5
+		// 6 7 8
+		neighbourIndices = append(neighbourIndices, [2]int{x - 1, y - 1}) // 1
+		neighbourIndices = append(neighbourIndices, [2]int{x, y - 1})     // 2
+		neighbourIndices = append(neighbourIndices, [2]int{x + 1, y - 1}) // 3
+		neighbourIndices = append(neighbourIndices, [2]int{x - 1, y})     // 4
+		neighbourIndices = append(neighbourIndices, [2]int{x + 1, y})     // 5
+		neighbourIndices = append(neighbourIndices, [2]int{x - 1, y + 1}) // 6
+		neighbourIndices = append(neighbourIndices, [2]int{x, y + 1})     // 7
+		neighbourIndices = append(neighbourIndices, [2]int{x + 1, y + 1}) // 8
+	}
+
+	return neighbourIndices
 }
 
 func part1() {
